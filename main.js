@@ -1,7 +1,7 @@
-import { initScene } from './sceneSetup.js';
-import { resolve } from './vectorMath.js';
-import { UIManager } from './uiManager.js';
-import { STEPS } from './steps.js';
+import { initScene } from '.src/sceneSetup.js';
+import { resolve } from '.src/vectorMath.js';
+import { UIManager } from '.src/uiManager.js';
+import { STEPS } from '.src/steps.js';
 
 const canvas = document.getElementById('sim-canvas');
 const {
