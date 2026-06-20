@@ -626,6 +626,53 @@ html, body {
   flex-shrink: 0;
 }
 
+/* ─── Numeric input (paired with slider, appears to the left) ─────────── */
+.num-input-group {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-1);
+  flex-shrink: 0;
+}
+
+.num-input {
+  width: 58px;
+  height: 36px;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--color-ink);
+  background: var(--color-paper);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-xs);
+  padding: 0 var(--sp-2);
+  text-align: right;
+  outline: none;
+  -moz-appearance: textfield;
+}
+
+.num-input::-webkit-inner-spin-button,
+.num-input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.num-input:hover {
+  border-color: var(--color-bench-grey);
+}
+
+.num-input:focus {
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 18%, transparent);
+}
+
+.num-input-unit {
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--color-bench-grey);
+  flex-shrink: 0;
+  min-width: 12px;
+}
+
 /* ─── Equations ───────────────────────────────────────────────────────── */
 .equations-panel {
   background: var(--color-geometry-fill);

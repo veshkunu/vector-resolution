@@ -76,7 +76,7 @@ export class UIManager {
       if (id === 'magnitude') {
         this._controls.appendChild(this._makeSlider({
           id: 'ctrl-mag', label: 'Magnitude F', unit: 'N',
-          min: 10, max: 200, step: 1, value: state.magnitude,
+          min: 0, max: 500, step: 1, value: state.magnitude,
           onChange: v => this._on.magnitudeChange?.(v),
         }));
       }
@@ -137,31 +137,32 @@ export class UIManager {
 
   // ─── Live readouts ────────────────────────────────────────────────────
   updateReadouts(state) {
-    const magR = document.querySelector('[data-readout="ctrl-mag"]');
-    if (magR) magR.textContent = `${Math.round(state.magnitude)} N`;
+    const magN = document.querySelector('[data-num-input="ctrl-mag"]');
+    const magS = document.getElementById('ctrl-mag');
+    if (magN) magN.value = Math.round(state.magnitude);
+    if (magS) magS.value = state.magnitude;
 
-    const angR = document.querySelector('[data-readout="ctrl-ang"]');
-    if (angR) angR.textContent = `${Math.round(state.angle)}°`;
+    const angN = document.querySelector('[data-num-input="ctrl-ang"]');
+    const angS = document.getElementById('ctrl-ang');
+    if (angN) angN.value = Math.round(state.angle);
+    if (angS) angS.value = state.angle;
 
     if (this._equations.children.length) this._updateEquations(state);
 
     if (this._currentStep?.insight) this._updateInsight(state.angle);
   }
 
-  // Sync slider positions after a drag interaction
+  // Sync slider + number input positions after a drag interaction
   setSliderValues(magnitude, angle) {
     const mi = document.getElementById('ctrl-mag');
-    if (mi) {
-      mi.value = magnitude;
-      const mr = document.querySelector('[data-readout="ctrl-mag"]');
-      if (mr) mr.textContent = `${Math.round(magnitude)} N`;
-    }
+    const mn = document.querySelector('[data-num-input="ctrl-mag"]');
+    if (mi) mi.value = magnitude;
+    if (mn) mn.value = Math.round(magnitude);
+
     const ai = document.getElementById('ctrl-ang');
-    if (ai) {
-      ai.value = angle;
-      const ar = document.querySelector('[data-readout="ctrl-ang"]');
-      if (ar) ar.textContent = `${Math.round(angle)}°`;
-    }
+    const an = document.querySelector('[data-num-input="ctrl-ang"]');
+    if (ai) ai.value = angle;
+    if (an) an.value = Math.round(angle);
   }
 
   // ─── HTML labels over the canvas ─────────────────────────────────────
@@ -302,30 +303,66 @@ export class UIManager {
     const row = document.createElement('div');
     row.className = 'control-row';
     row.innerHTML = `
-      <label class="control-label" for="${id}">${label}</label>
+      <label class="control-label" for="${id}-num">${label}</label>
       <div class="slider-row">
+        <div class="num-input-group">
+          <input type="number" id="${id}-num" class="num-input"
+                 data-num-input="${id}"
+                 min="${min}" max="${max}" step="${step}" value="${Math.round(value)}"
+                 aria-label="${label} value in ${unit}">
+          <span class="num-input-unit" aria-hidden="true">${unit}</span>
+        </div>
         <input type="range" id="${id}" class="slider"
                min="${min}" max="${max}" step="${step}" value="${value}"
-               aria-label="${label} in ${unit}">
-        <span class="slider-readout" data-readout="${id}">${Math.round(value)} ${unit}</span>
+               aria-label="${label} slider">
       </div>`;
 
-    const input   = row.querySelector('input');
-    const readout = row.querySelector('.slider-readout');
-    input.addEventListener('input', () => {
-      const v = parseFloat(input.value);
-      readout.textContent = `${Math.round(v)} ${unit}`;
+    const slider   = row.querySelector('input[type="range"]');
+    const numInput = row.querySelector('.num-input');
+
+    // Slider → number input
+    slider.addEventListener('input', () => {
+      const v = parseFloat(slider.value);
+      numInput.value = Math.round(v);
       onChange(v);
     });
-    input.addEventListener('keydown', e => {
+
+    // Shift+Arrow fine adjustment on slider
+    slider.addEventListener('keydown', e => {
       if (!e.shiftKey) return;
       e.preventDefault();
       const delta = (e.key === 'ArrowRight' || e.key === 'ArrowUp') ? 0.5 : -0.5;
-      const v = Math.min(max, Math.max(min, parseFloat(input.value) + delta));
-      input.value = v;
-      readout.textContent = `${v.toFixed(1)} ${unit}`;
+      const v = Math.min(max, Math.max(min, parseFloat(slider.value) + delta));
+      slider.value = v;
+      numInput.value = v.toFixed(1);
       onChange(v);
     });
+
+    // Number input → slider (live, as user types)
+    numInput.addEventListener('input', () => {
+      const raw = parseFloat(numInput.value);
+      if (isNaN(raw)) return;
+      const v = Math.min(max, Math.max(min, raw));
+      slider.value = v;
+      onChange(v);
+    });
+
+    // Clamp and round on blur
+    numInput.addEventListener('blur', () => {
+      const raw = parseFloat(numInput.value);
+      const v   = isNaN(raw) ? parseFloat(slider.value) : Math.min(max, Math.max(min, raw));
+      numInput.value = Math.round(v);
+      slider.value   = v;
+    });
+
+    // Select-all on focus for quick replacement
+    numInput.addEventListener('focus', () => numInput.select());
+
+    // Enter commits the value
+    numInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') numInput.blur();
+    });
+
     return row;
   }
 
