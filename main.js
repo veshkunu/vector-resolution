@@ -4,11 +4,29 @@ import { UIManager } from './src/uiManager.js';
 import { STEPS } from './src/steps.js';
 
 const canvas = document.getElementById('sim-canvas');
+
+let initResult;
+try {
+  initResult = initScene(canvas);
+} catch (err) {
+  const emptyState = document.getElementById('empty-state');
+  if (emptyState) {
+    emptyState.removeAttribute('aria-hidden');
+    emptyState.setAttribute('role', 'alert');
+    const p = emptyState.querySelector('p');
+    if (p) {
+      p.textContent = 'WebGL could not start. Try Chrome or Firefox, or enable hardware acceleration in your browser settings.';
+      p.className = 'empty-error';
+    }
+  }
+  throw err;
+}
+
 const {
   scene, camera, renderer,
   resize, update: sceneUpdate, tick,
   worldToScreen, setDragCallback, startComponentAnimation,
-} = initScene(canvas);
+} = initResult;
 
 const ui = new UIManager();
 

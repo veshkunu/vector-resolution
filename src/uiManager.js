@@ -51,12 +51,13 @@ export class UIManager {
     this._stepHint.textContent   = step.hint || '';
     this._stepHint.style.display = step.hint ? '' : 'none';
 
-    // "What You Are Seeing" panel
+    // "What you're seeing" — collapsed disclosure, appears after controls
     if (this._conceptPanel) {
+      this._conceptPanel.removeAttribute('open');
       if (step.whatYouSee) {
         this._conceptPanel.innerHTML = `
-          <div class="concept-panel-title label">What You Are Seeing</div>
-          <p>${step.whatYouSee}</p>`;
+          <summary class="disclosure-summary">What you're seeing</summary>
+          <div class="disclosure-body"><p>${step.whatYouSee}</p></div>`;
         this._conceptPanel.style.display = '';
       } else {
         this._conceptPanel.style.display = 'none';
@@ -105,12 +106,13 @@ export class UIManager {
       this._equations.appendChild(this._makeEquations(state));
     }
 
-    // Real-world callout
+    // Real-world connection — collapsed disclosure, appears after controls
     if (this._realWorldEl) {
+      this._realWorldEl.removeAttribute('open');
       if (step.realWorld) {
         this._realWorldEl.innerHTML = `
-          <div class="realworld-title label">Real-World Example</div>
-          <p>${step.realWorld}</p>`;
+          <summary class="disclosure-summary">Real-world connection</summary>
+          <div class="disclosure-body"><p>${step.realWorld}</p></div>`;
         this._realWorldEl.style.display = '';
       } else {
         this._realWorldEl.style.display = 'none';
@@ -130,8 +132,8 @@ export class UIManager {
     }
 
     // Nav buttons
-    this._btnBack.disabled         = step.id === 1;
-    this._btnBack.style.visibility = step.id === 1 ? 'hidden' : 'visible';
+    this._btnBack.disabled      = step.id === 1;
+    this._btnBack.style.display = step.id === 1 ? 'none' : '';
     this._btnNext.textContent      = step.id === TOTAL_STEPS ? 'Start over' : 'Next →';
   }
 
@@ -355,8 +357,9 @@ export class UIManager {
       slider.value   = v;
     });
 
-    // Select-all on focus for quick replacement
+    // Select-all on focus (Tab) and on click (fires after mouseup resets cursor)
     numInput.addEventListener('focus', () => numInput.select());
+    numInput.addEventListener('click',  () => numInput.select());
 
     // Enter commits the value
     numInput.addEventListener('keydown', e => {

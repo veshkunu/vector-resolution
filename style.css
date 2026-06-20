@@ -189,6 +189,15 @@ html, body {
   opacity: 0.6;
 }
 
+/* Error state — overrides faded loading text with readable, actionable copy */
+.empty-state .empty-error {
+  color: var(--color-ink-secondary);
+  opacity: 1;
+  line-height: 1.55;
+  max-width: 28ch;
+  text-align: center;
+}
+
 /* ─── Scene labels (HTML overlay) ─────────────────────────────────────── */
 .scene-labels {
   position: absolute;
@@ -365,6 +374,7 @@ html, body {
   font-size: 0.9rem;
 }
 .guidance-callout:empty { display: none; }
+.equations-area:empty   { display: none; }
 
 /* ─── Learning objective ─────────────────────────────────────────────── */
 .learning-objective {
@@ -388,34 +398,62 @@ html, body {
   color: var(--color-ink);
 }
 
-/* ─── What You Are Seeing panel ──────────────────────────────────────── */
-.concept-panel {
-  background: var(--color-geometry-fill);
+/* ─── Collapsed disclosures (What you're seeing / Real-world connection) ─ */
+.step-disclosure {
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
-  padding: var(--sp-3) var(--sp-4);
+  overflow: hidden;
+}
+
+.step-disclosure[open] {
+  background: var(--color-geometry-fill);
+}
+
+.disclosure-summary {
+  list-style: none;
   display: flex;
-  flex-direction: column;
+  align-items: center;
   gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  cursor: pointer;
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: var(--color-ink-secondary);
+  -webkit-user-select: none;
+  user-select: none;
 }
 
-.concept-panel-title {
-  /* inherits .label — keep ink-secondary color */
+.disclosure-summary::-webkit-details-marker { display: none; }
+.disclosure-summary::marker { display: none; }
+
+.disclosure-summary::before {
+  content: '';
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 4px 0 4px 6px;
+  border-color: transparent transparent transparent var(--color-bench-grey);
+  flex-shrink: 0;
+  transition: transform 0.15s ease;
 }
 
-.concept-panel p {
+details[open] > .disclosure-summary::before {
+  transform: rotate(90deg);
+}
+
+.disclosure-body {
+  padding: 0 var(--sp-3) var(--sp-3);
   font-size: 0.875rem;
   line-height: 1.55;
   color: var(--color-ink);
-  margin: 0;
 }
 
 /* ─── Concept insight (Step 5 live update) ───────────────────────────── */
 .insight-callout {
-  border-left: 3px solid var(--color-accent);
+  border: 1px solid color-mix(in srgb, var(--color-accent) 22%, transparent);
   padding: var(--sp-3) var(--sp-4);
   background: var(--color-accent-soft);
-  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
+  border-radius: var(--radius-sm);
   display: flex;
   flex-direction: column;
   gap: var(--sp-2);
@@ -426,28 +464,6 @@ html, body {
 }
 
 .insight-callout p {
-  font-size: 0.875rem;
-  line-height: 1.55;
-  color: var(--color-ink);
-  margin: 0;
-}
-
-/* ─── Real-world callout ─────────────────────────────────────────────── */
-.realworld-callout {
-  border-left: 3px solid var(--color-success);
-  padding: var(--sp-3) var(--sp-4);
-  background: var(--color-success-soft);
-  border-radius: 0 var(--radius-xs) var(--radius-xs) 0;
-  display: flex;
-  flex-direction: column;
-  gap: var(--sp-2);
-}
-
-.realworld-title {
-  color: var(--color-success);
-}
-
-.realworld-callout p {
   font-size: 0.875rem;
   line-height: 1.55;
   color: var(--color-ink);
@@ -466,7 +482,7 @@ html, body {
 }
 
 .cc-title {
-  /* inherits .label — ink-secondary */
+  /* inherits .label weight and color; uppercase overridden below */
 }
 
 .cc-question {
@@ -638,7 +654,7 @@ html, body {
   width: 58px;
   height: 36px;
   font-family: var(--font-mono);
-  font-size: 0.875rem;
+  font-size: 1rem;
   font-variant-numeric: tabular-nums;
   color: var(--color-ink);
   background: var(--color-paper);
@@ -691,6 +707,17 @@ html, body {
 
 .eq-title {
   margin-bottom: var(--sp-1);
+}
+
+/* Internal callout titles use sentence case.
+   Tracked uppercase (.label base) is reserved for the outer-frame
+   labels only: "Learning Objective" (lo-label) and "Step X of Y" (step-counter). */
+.insight-title,
+.cc-title,
+.eq-title {
+  text-transform: none;
+  letter-spacing: 0;
+  font-size: 0.8125rem;
 }
 
 .eq-grid {

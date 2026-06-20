@@ -40,9 +40,9 @@
           <span id="label-fy"     class="scene-label scene-label--fy"     style="display:none"></span>
         </div>
 
-        <!-- Empty state (hidden after first render) -->
+        <!-- Empty state: shows loading text initially; timeout script upgrades to error if Three.js never loads -->
         <div class="empty-state" id="empty-state" aria-hidden="true">
-          <p>Your diagram will appear here</p>
+          <p>Loading simulation…</p>
         </div>
       </div>
 
@@ -63,10 +63,10 @@
           <h1 class="step-title" id="step-title"></h1>
           <p  class="step-lead"  id="step-lead"></p>
 
-          <!-- What You Are Seeing — dynamic per step -->
-          <div class="concept-panel" id="concept-panel" style="display:none"></div>
-
           <div class="hint-callout" id="step-hint"></div>
+
+          <!-- Equations appear before controls so the formula is visible while adjusting sliders -->
+          <div class="equations-area"  id="equations-area"></div>
 
           <div class="controls-area"   id="controls-area"></div>
           <div class="guidance-callout" id="step-guidance" style="display:none"></div>
@@ -77,10 +77,9 @@
             <p data-insight-text></p>
           </div>
 
-          <div class="equations-area"  id="equations-area"></div>
-
-          <!-- Real-world example — dynamic per step -->
-          <div class="realworld-callout" id="realworld-callout" style="display:none"></div>
+          <!-- Secondary disclosures — collapsed by default; appear after interaction zone -->
+          <details class="step-disclosure" id="concept-panel" style="display:none"></details>
+          <details class="step-disclosure" id="realworld-callout" style="display:none"></details>
 
           <!-- Concept-check question — Steps 2 and 3 -->
           <div class="concept-check" id="concept-check" style="display:none"></div>
@@ -99,6 +98,23 @@
     </div><!-- /.main-area -->
 
   </div><!-- /.app-shell -->
+
+  <!-- Detect Three.js load failure: if the canvas is still blank after 6 s, the CDN was blocked or
+       the browser does not support import maps. Switch the empty-state into an actionable error. -->
+  <script>
+    setTimeout(function () {
+      var el = document.getElementById('empty-state');
+      if (el && el.style.display !== 'none') {
+        el.removeAttribute('aria-hidden');
+        el.setAttribute('role', 'alert');
+        var p = el.querySelector('p');
+        if (p) {
+          p.textContent = 'The simulation did not load. Check your internet connection, or open this page in Chrome or Firefox.';
+          p.className = 'empty-error';
+        }
+      }
+    }, 6000);
+  </script>
 
   <script type="module" src="main.js"></script>
 </body>
